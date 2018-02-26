@@ -56,4 +56,6 @@ Then run 'make' in the CTCode directory to compile the executable 'colour_transf
 eg. 
 ./colour_transfer.x parrot-1.jpg parrot-2.jpg result.jpg 
 
+The TARGET image is the input image that is to be recoloured. The PALETTE image is the image with the desired colour palette. These colours will be mapped onto the target image.
+
 

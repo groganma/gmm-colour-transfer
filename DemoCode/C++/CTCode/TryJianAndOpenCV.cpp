@@ -119,32 +119,61 @@ Mat recolourImage(Mat A, Mat pix, Mat Nv, Mat ctrl)
 }
 
 int main(int argc, char* argv[]) {
-
 	//Init Mat
 	Mat target, palette, centers_target, centers_palette;
-	Mat full_target, flt_target, recolour, recolour_reshp, result_show;
 	Mat A, Param, ctrl, PP, Nv;
+	bool video_recolour;
 
+	//Error messages if num arg wrong
 	if (argc < 4)
 	{
-		std::cerr << "Usage : ./colour_transfer.x <target image> <palette image> <destination>" << std::endl; 
+		std::cout << "Usage for image recoloring : ./colour_transfer.x <target image> <palette image> <destination video file>" << std::endl;
+		std::cout << "Example : ./colour_transfer.x parrot-1.jpg parrot-2.jpg result.jpg" << std::endl;
+		std::cout << "Usage for video recolouring : ./colour_transfer.x <target image (selected video frame)> <palette image> <target video file> <destination video file>" << std::endl;
+		std::cout << "Example : ./colour_transfer.x video_frame.jpg palette.jpg video.mp4 result.avi" << std::endl;
 		return 1;
 	}
 
-	//read in images
-	cout << "Reading in the input images.. " << endl;
+	//Image recolouring if 3 inputs given
+	if (argc == 4)
+	{
+		std::cout << "Image recolouring started.. " << endl;
+		video_recolour = 0;
+	}
+
+	//Video recolouring if 4 inputs given
+	if (argc == 5)
+	{
+		std::cout << "Video recolouring started.. " << endl;
+		video_recolour = 1;
+	}
+
+	//read in images 
+	cout << "Reading in the target and palette images.. " << endl;
 	target = imread(argv[1], 1);
+	if (target.empty())                      // Check for invalid input
+	{
+		std::cerr << "Error: Could not open or find the target image" << std::endl;
+		return -1;
+	}
 	palette = imread(argv[2], 1);
+	if (palette.empty())                      // Check for invalid input
+	{
+		std::cerr << "Error: Could not open or find the palette image" << std::endl;
+		return -1;
+	}
+
 	cout << "Done. " << endl;
 
 	//Initialise the directories of files
 	const char* colour_new_ini = "/home/mairead/Code/ColourTransfer/CTCode/colour_new.ini";
 	const char* colour_X_new = "/home/mairead/Code/ColourTransfer/CTCode/colour_data/colour_X_new.txt";
 	const char* colour_Y_new = "/home/mairead/Code/ColourTransfer/CTCode/colour_data/colour_Y_new.txt";
-	const char* final_colour_affine ="/home/mairead/Code/ColourTransfer/CTCode/final_colour_affine.txt";
-	const char* final_colour_tps ="/home/mairead/Code/ColourTransfer/CTCode/final_colour_tps.txt";
-	const char* colour_ctrl_pts ="/home/mairead/Code/ColourTransfer/CTCode/colour_data/colour_ctrl_pts.txt";
+	const char* final_colour_affine = "/home/mairead/Code/ColourTransfer/CTCode/final_colour_affine.txt";
+	const char* final_colour_tps = "/home/mairead/Code/ColourTransfer/CTCode/final_colour_tps.txt";
+	const char* colour_ctrl_pts = "/home/mairead/Code/ColourTransfer/CTCode/colour_data/colour_ctrl_pts.txt";
 	const char* PP_str = "/home/mairead/Code/ColourTransfer/CTCode/colour_data/PP.txt";
+
 
 
 	//find cluster centres
@@ -160,11 +189,6 @@ int main(int argc, char* argv[]) {
 	cout << "Registering the colour distributions.. " << endl;
 	gmmreg_api(colour_new_ini, "TPS_L2");
 
-	
-	//reshape target so can recolour
-	target.convertTo(flt_target, CV_32F);
-	full_target = flt_target.reshape(1, (target.rows)*(target.cols)); //reshape so of size nx3
-
 	//read in the pre set parameters needed to transform the pixels using the TPS transformation (ie PP, control points, estimates parameters (param and A)).
 	cout << "Reading in variables from file for recolouring.. " << endl;
 	A = ReadMatFromTxt(final_colour_affine, 4);
@@ -174,19 +198,79 @@ int main(int argc, char* argv[]) {
 	Nv = PP*Param;
 	cout << "Done. " << endl;
 
-	
-	cout << "Recolouring the target image in parallel.. " << endl;
-	//recolour image
-	recolour = recolourImage(A, full_target, Nv, ctrl); //full_target is the pixels, A is the affine transformation, Nv are the parameters, ctrl control points.
-	recolour_reshp = recolour.reshape(3, (target.rows)); //reshape so of size nx3
-	recolour_reshp.convertTo(result_show, CV_8UC1); //change format
-	char* destination = argv[3];
-	imwrite( destination, result_show );
-	cout << "Done. Result image has been saved." << endl;
-	//imshow("result image", result_show); //show result
-	//waitKey(0);
+	//Image recolouring
+	if (video_recolour == 0) {
 
-return 1;
+		cout << "Recolouring the target image in parallel.. " << endl;
+
+		Mat flt_target, full_target, recolour, recolour_reshp, result_show;
+
+		//reshape target image so can recolour
+		target.convertTo(flt_target, CV_32F);
+		full_target = flt_target.reshape(1, (target.rows)*(target.cols)); //reshape so of size nx3
+
+																		  //recolour image
+		recolour = recolourImage(A, full_target, Nv, ctrl); //full_target is the pixels, A is the affine transformation, Nv are the parameters, ctrl control points.
+		recolour_reshp = recolour.reshape(3, (target.rows)); //reshape so of size nx3
+		recolour_reshp.convertTo(result_show, CV_8UC1); //change format
+		char* destination = argv[3];
+		imwrite(destination, result_show);
+	}
+
+	//video recolouring
+	else
+	{
+		//initialise some video variables 
+		Mat frame, flt_frame, full_frame, recolour_frame, recolour_reshp, final_frame;
+		double fps, frame_width, frame_height, num_frames;
+
+		//load target video
+		VideoCapture tar_vid(argv[3]);
+
+
+		if (tar_vid.isOpened() == false)
+		{
+			std::cerr << "Error: Cannot open the video file" << endl;
+			return 1;
+		}
+
+		//initialise some video parameters
+		fps = tar_vid.get(CAP_PROP_FPS);
+		frame_width = tar_vid.get(CV_CAP_PROP_FRAME_WIDTH);
+		frame_height = tar_vid.get(CV_CAP_PROP_FRAME_HEIGHT);
+		num_frames = tar_vid.get(CV_CAP_PROP_FRAME_COUNT);
+
+		//recolour video
+		VideoWriter video(argv[4], CV_FOURCC('M', 'J', 'P', 'G'), fps, Size(frame_width, frame_height));
+		int count = 0;
+		while (1)
+		{
+
+			count = count + 1;
+			std::cout << "Processing frame number " << count << "/" << num_frames << ". ";
+			// Capture target video frame-by-frame 
+			tar_vid >> frame;
+
+			// If the frame is empty, break immediately
+			if (frame.empty())
+				break;
+
+			frame.convertTo(flt_frame, CV_32F);
+			full_frame = flt_frame.reshape(1, (frame.rows)*(frame.cols));
+			recolour_frame = recolourImage(A, full_frame, Nv, ctrl); //full_target is the pixels, A is the affine transformation, Nv are the parameters, ctrl control points.
+			recolour_reshp = recolour_frame.reshape(3, (frame.rows)); //reshape so of size nx3
+			recolour_reshp.convertTo(final_frame, CV_8UC1);
+
+			// Write the frame into the file 'outcpp.avi'
+			video.write(final_frame);
+
+		}
+		tar_vid.release();
+		video.release();
+	}
+
+	cout << "Done. Results have been saved." << endl;
+	return 1;
 
 
 }

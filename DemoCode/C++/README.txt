@@ -44,18 +44,30 @@ Then the paths in line 6 and 7 should correctly point to directories in the Open
 Note that in line 3 we also define the path in which the libgmmreg_api.so can be found with -Wl,-rpath=gmmreg 
 
 In TryJianAndOpenCV.cpp:
-Change the paths in lines 141 - 147 from '/home/mairead/Code/ColourTransfer/' to the local directory of the folder CTCode.
+Change the paths in lines 169 - 175 from '/home/mairead/Code/ColourTransfer/' to the local directory of the folder CTCode.
 
 Then run 'make' in the CTCode directory to compile the executable 'colour_transfer.x'
 
 
 
-4. Running colour_transfer.x: To run the executable, run the command 
+4. Running colour_transfer.x:
+
+For IMAGE recolouring run the command 
 ./colour_transfer.x <target image name> <palette image name> <result image name>
 
 eg. 
 ./colour_transfer.x parrot-1.jpg parrot-2.jpg result.jpg 
 
 The TARGET image is the input image that is to be recoloured. The PALETTE image is the image with the desired colour palette. These colours will be mapped onto the target image.
+
+For VIDEO recolouring run the command: 
+
+./colour_transfer.x <target video frame> <palette image name> <target video file > <result image name>
+
+eg. 
+./colour_transfer.x video_frame.jpg palette.jpg video.mp4 result.avi
+
+The TARGET VIDEO FRAME is a frame from the video to be recoloured, it is used to compute the colour transformation that will be applied to the video. The PALETTE image is the image with the desired colour palette.
+The VIDEO file will be recoloured using the transformation estimated between the target video frame and the palette image. 
 
 

@@ -65,7 +65,7 @@ For VIDEO recolouring run the command:
 ./colour_transfer.x <target video frame> <palette image name> <target video file > <result image name>
 
 eg. 
-./colour_transfer.x video_frame.jpg palette.jpg video.mp4 result.avi
+./colour_transfer.x video_frame.jpg palette.jpg video.avi result.avi
 
 The TARGET VIDEO FRAME is a frame from the video to be recoloured, it is used to compute the colour transformation that will be applied to the video. The PALETTE image is the image with the desired colour palette.
 The VIDEO file will be recoloured using the transformation estimated between the target video frame and the palette image. 

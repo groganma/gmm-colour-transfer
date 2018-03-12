@@ -130,7 +130,7 @@ int main(int argc, char* argv[]) {
 		std::cout << "Usage for image recoloring : ./colour_transfer.x <target image> <palette image> <destination video file>" << std::endl;
 		std::cout << "Example : ./colour_transfer.x parrot-1.jpg parrot-2.jpg result.jpg" << std::endl;
 		std::cout << "Usage for video recolouring : ./colour_transfer.x <target image (selected video frame)> <palette image> <target video file> <destination video file>" << std::endl;
-		std::cout << "Example : ./colour_transfer.x video_frame.jpg palette.jpg video.mp4 result.avi" << std::endl;
+		std::cout << "Example : ./colour_transfer.x video_frame.jpg palette.jpg video.avi result.avi" << std::endl;
 		return 1;
 	}
 

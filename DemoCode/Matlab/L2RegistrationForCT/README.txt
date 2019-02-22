@@ -6,8 +6,7 @@
 %%-------------------------------------------------------------------
 
 This zip file contains the code for the L2 based colour transfer method 
-described in 'Robust Registration of Gaussian Mixtures for
-Colour Transfer' currently posted on Arxiv. If using this code, please cite this paper. 
+described in 'L2 Divergence for robust colour transfer' published in Computer Vision and Image Understanding 2019. If using this code, please cite this paper. 
 
 
 It contains code sourced from https://github.com/bing-jian/gmmreg  written by

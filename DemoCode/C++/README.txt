@@ -3,7 +3,7 @@ Author: Mairead Grogan
 Contact: mgrogan@tcd.ie
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-The folder CTCode contains the C++ code for the paper 'Robust Registration of Gaussian Mixtures for Colour Transfer' (https://arxiv.org/abs/1705.06091).
+The folder CTCode contains the C++ code for the paper 'L2 Divergence for robust colour transfer' published in Computer Vision and Image Understanding 2019.
 
 It depends on the C++ library 'gmmreg' created by Jian et al. and provided at the following link:
 https://github.com/bing-jian/gmmreg
@@ -11,9 +11,9 @@ The gmmreg library has been provided along with this code.
 
 Therefore, if using this colour transfer code please cite the following papers:
 
-1. Robust Registration of Gaussian Mixtures for Colour Transfer
+1.'L2 Divergence for robust colour transfer'
  Mairead Grogan and Rozenn Dahyot
- Arxiv 2017
+ Computer Vision and Image Understanding 2019
 
 
 2. A Robust Algorithm for Point Set Registration Using Mixture of Gaussians,
